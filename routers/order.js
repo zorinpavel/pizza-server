@@ -20,20 +20,24 @@ router.get('/', auth, async(req, res) => {
 router.post('/', async(req, res) => {
     const userRequested = { name, email, address } = req.body;
 
-    const user = await User.findOne({ email: req.body.email })
-        .then((model = {}) => {
-            return model ? Object.assign(model, userRequested) : new User(userRequested);
-        })
-        .then(model => model.save())
-        .catch(e => {
-            throw new Error(e);
-        });
+    try {
+        const user = await User.findOne({ email: req.body.email })
+            .then((model = {}) => {
+                return model ? Object.assign(model, userRequested) : new User(userRequested);
+            })
+            .then(model => model.save())
+            .catch(e => {
+                throw new Error(e);
+            });
 
-    const order = new Order({ owner: user._id, cart: req.body.cart });
+        const order = new Order({ owner: user._id, cart: req.body.cart });
 
-    await order.save();
+        await order.save();
 
-    return res.status(200).send({ user, order });
+        return res.status(200).send({ user, order });
+    } catch(e) {
+        return res.status(400).send({ error: 'Cant save order', message: e.message });
+    }
 });
 
 
