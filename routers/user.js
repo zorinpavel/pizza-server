@@ -70,7 +70,9 @@ router.post('/signup', async(req, res) => {
                 throw new Error(e);
             });
 
-        return res.status(200).send({ user, authToken: user.authToken });
+        const authToken = await user.generateAuthToken();
+
+        return res.status(200).send({ user, authToken });
     } catch(e) {
         return res.status(500).send({ error: 'Bad request', message: e.message });
     }
